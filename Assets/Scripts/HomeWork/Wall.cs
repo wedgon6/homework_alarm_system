@@ -7,44 +7,42 @@ using static UnityEngine.GraphicsBuffer;
 
 public class Wall : MonoBehaviour
 {
-    [SerializeField] private AudioSource _audio;
-    [SerializeField] private float _duration;
+    [SerializeField] private UnityEvent _alarmStart;
+    [SerializeField] private UnityEvent _alarmStop;
 
-    private float _runningTime;
-    private bool _isPlaying;
-    private float _target;
-    private float _volumeScale;
+    private bool _isPlaying = false;
 
     private void Start()
     {
-        _audio.volume = 0f;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        _audio.Play();
-        _isPlaying = true;
+        if(collision.TryGetComponent<Enemy>(out Enemy enemy))
+        {
+            _isPlaying = true;
+        }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        _isPlaying = false;
+        if(collision.TryGetComponent<Enemy>(out Enemy enemy))
+        {
+            _isPlaying = false;
+        }
     }
 
     private void Update()
     {
-        _runningTime += Time.deltaTime;
-        _volumeScale =  _runningTime / _duration;
 
         if (_isPlaying)
         {
-            _target = 1f;
+            _alarmStart?.Invoke();
+
         }
         else
         {
-            _target = 0f;
+            _alarmStop?.Invoke();
         }
-
-        _audio.volume = Mathf.Lerp(_audio.volume, _target, _volumeScale);
     }
 }
