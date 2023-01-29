@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
 
+[RequireComponent(typeof(AudioSource))]
 public class Alarm_Valume : MonoBehaviour
 {
     [SerializeField] private float _duration;
-    private AudioSource _audio;
 
-    private bool _isPlaying;
+    private AudioSource _audio;
     private float _target;
     private Coroutine _coroutine;
 
@@ -20,17 +20,32 @@ public class Alarm_Valume : MonoBehaviour
 
     public void PlaySound()
     {
-        _isPlaying = true;
         _target = 1f;
 
-        _coroutine = StartCoroutine(VolumeChanget());
+        if (_coroutine == null)
+        {
+            _coroutine = StartCoroutine(ReduceChanget(_target));
+        }
+        else
+        {
+            StopCoroutine(_coroutine);
+            _coroutine = StartCoroutine(ReduceChanget(_target));
+        }
     }
 
     public void StopSound()
     {
-        _isPlaying = false;
         _target = 0f;
-        _coroutine = StartCoroutine(VolumeChanget());
+
+        if (_coroutine == null)
+        {
+            _coroutine = StartCoroutine(IncreaseChanget(_target));
+        }
+        else
+        {
+            StopCoroutine(_coroutine);
+            _coroutine = StartCoroutine(IncreaseChanget(_target));
+        }
     }
 
     private void Update()
@@ -42,24 +57,27 @@ public class Alarm_Valume : MonoBehaviour
         }
     }
 
-    public void StartAlarm()
+    private IEnumerator IncreaseChanget(float target)
     {
-        StartCoroutine(VolumeChanget());
+        var volume = _audio.volume;
+
+        for (float i = 0; i >= target; i+=_duration)
+        {
+            volume = Mathf.Lerp(_audio.volume, target, _duration);
+            _audio.volume = volume;
+            yield return null;
+        }
     }
 
-    private IEnumerator VolumeChanget()
+    private IEnumerator ReduceChanget(float target)
     {
-        if (_isPlaying)
-        {
-            _target = 1f;
-        }
-        else
-        {
-            _target = 0f;
-        }
+        var volume = _audio.volume;
 
-        _audio.volume = Mathf.Lerp(_audio.volume, _target, _duration);
-
-        yield return null;
+        for (float i = 0; i <= target; i -= _duration)
+        {
+            volume = Mathf.Lerp(_audio.volume, target, _duration);
+            _audio.volume = volume;
+            yield return null;
+        }
     }
 }
