@@ -7,8 +7,8 @@ using static UnityEngine.GraphicsBuffer;
 
 public class Wall : MonoBehaviour
 {
-    [SerializeField] private UnityEvent _alarmStart;
-    [SerializeField] private UnityEvent _alarmStop;
+    [SerializeField] private UnityEvent _wentInEnemy;
+    [SerializeField] private UnityEvent _cameOutEnemy;
 
     private void Start()
     {
@@ -18,7 +18,7 @@ public class Wall : MonoBehaviour
     {
         if(collision.TryGetComponent<Enemy>(out Enemy enemy))
         {
-            _alarmStart?.Invoke();
+            _wentInEnemy?.Invoke();
         }
     }
 
@@ -26,7 +26,7 @@ public class Wall : MonoBehaviour
     {
         if(collision.TryGetComponent<Enemy>(out Enemy enemy))
         {
-            _alarmStop?.Invoke();
+            _cameOutEnemy?.Invoke();
         }
     }
 }
